@@ -1,4 +1,6 @@
 
+# use 'prefix' concept only for debugging
+# may consume more memory (although unlikely)
 class TrieNode:    
     def __init__(self, letter):
         self.children = {}
@@ -40,15 +42,26 @@ class TrieNode:
         return results
     
     def addWord(self, word):
-        currNode = self
-        prefix = ""
-        for letter in word:
-            if not (letter in currNode.children.keys()):
-                currNode.addChild(letter)
-            prefix += letter
-            currNode = currNode.getChild(letter)
-        currNode.prefix = prefix
-        currNode.isWord = True
+        wordIsValid = True
+        # check if word is valid for storing/adding
+        if ( (type(word) != str) and (len(word) > 0) ):
+            try:
+                word = str(word)
+            except:
+                print("Invalid Word:", word)
+                wordIsValid = False
+        if (wordIsValid):
+            currNode = self
+            prefix = ""
+            for letter in word:
+                if (letter == '\n'): continue # skip new line char
+                letter = letter.lower() # store all letters as lowercase
+                if not (letter in currNode.children.keys()):
+                    currNode.addChild(letter)
+                prefix += letter
+                currNode = currNode.getChild(letter)
+            currNode.prefix = prefix
+            currNode.isWord = True
         
     def removeWord(self, word):
         currNode = self
@@ -62,14 +75,17 @@ class TrieNode:
     def info(self):
         if (self.isWord):
             print(self.prefix)
-            if (self.isLeaf()): 
-                return
+            if (self.isLeaf()):
+                return 
         childNodes = self.children
         for child in childNodes.keys():
             childNode = childNodes[child]
             if (childNode != None):
                 childNode.info()
 
+# ====================
+# | FOR TESTING ONLY |
+# ====================
 
 trie = TrieNode('')
 wordList = [
@@ -77,8 +93,18 @@ wordList = [
     "apple", "able", "ancient", "allergy", "all", "application",
     "take", "task", "tar", "tangle", "ton", "tongue", "the", "there"
     ]
-
+"""
 for word in wordList:
     trie.addWord(word)
 trie.removeWord("pack")
 trie.info()
+"""
+
+file = "wordlist.txt"
+with open(file, "r") as fh:
+    words = fh.readlines()
+
+for word in words:
+    trie.addWord(word)
+
+
